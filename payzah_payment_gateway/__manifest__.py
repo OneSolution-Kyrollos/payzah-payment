@@ -8,8 +8,8 @@ Supports Knet and Credit Card payments.
 Developed by One Solutions - Kuwait
 Contact: +96592229650
     """,
-    'author': "Kyrollos Zaki | +96592229650",
-    'company': 'One Solutions',
+    'author': "One Solution",
+    'company': 'One Solution',
     'maintainer': 'Kyrollos Zaki | +96592229650',
     'website': "https://www.onesolutionc.com",
     'license': 'LGPL-3',

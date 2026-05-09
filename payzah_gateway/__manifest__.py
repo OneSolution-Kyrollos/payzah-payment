@@ -8,10 +8,10 @@ Supports Knet and Credit Card payments.
 Developed by One Solutions - Kuwait
 Contact: +96592229650
     """,
-    'author': "One Solution",
-    'company': 'One Solution',
+    'author': "Payzah",
+    'company': 'Payzah',
     'maintainer': 'Kyrollos Zaki | +96592229650',
-    'website': "https://www.onesolutionc.com",
+    'website': "https://payzah.com",
     'license': 'LGPL-3',
     'category': 'Accounting/Payment Acquirers',
     'version': '17.0.1.0.0',

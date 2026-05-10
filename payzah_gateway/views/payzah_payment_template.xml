@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ============================= -->
+        <!-- Payzah Payment Preview -->
+        <!-- ============================= -->
+        <template id="payzah_payment_gateway_form"
+                  name="Payzah Payment Confirm Form">
+            <t t-call="website.layout">
+                <div id="wrap">
+                    <div class="container">
+                        <div class="d-flex justify-content-center">
+                            <div class="mt-5">
+                                <h2 class="text-center">Payment Details</h2>
+                                <br/>
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <label>Customer</label>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       t-att-value="customer"
+                                                       readonly="1"/>
+                                            </td>
+                                            <td>
+                                                <label>Currency</label>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       t-att-value="currency"
+                                                       readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>Mobile</label>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       t-att-value="mobile"
+                                                       readonly="1"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label>Invoice Amount</label>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       t-att-value="invoice_amount"
+                                                       readonly="1"/>
+                                            </td>
+                                            <td>
+                                                <label>Address</label>
+                                                <input type="text"
+                                                       class="form-control"
+                                                       t-att-value="address"
+                                                       readonly="1"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="2" class="text-center">
+                                                <a class="btn btn-primary"
+                                                   t-attf-href="{{ payment_url }}">
+                                                    Confirm Payment
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- ============================= -->
+        <!-- Payzah SUCCESS PAGE -->
+        <!-- ============================= -->
+        <template id="payzah_payment_gateway_success_form"
+                  name="Payzah Payment Success">
+            <t t-call="website.layout">
+                <div id="wrap">
+                    <div class="container mt-5">
+                        <div class="alert alert-success text-center">
+                            <h4 class="mb-3">
+                                ✅ Payment Successful
+                            </h4>
+                            <p>
+                                Your payment via
+                                <strong>Payzah</strong>
+                                has been completed successfully.
+                            </p>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-6">
+                                        <strong>Amount</strong>
+                                        <div>
+                                            <t t-esc="tx.amount"/>
+                                            <t t-esc="tx.currency_id.name"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Reference</strong>
+                                        <div>
+                                            <t t-esc="tx.reference"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="/"
+                               class="btn btn-primary">
+                                Go to My Account
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- ============================= -->
+        <!-- Payzah FAILED PAGE -->
+        <!-- ============================= -->
+        <template id="payzah_payment_gateway_failed_form"
+                  name="Payzah Payment Failed">
+            <t t-call="website.layout">
+                <div id="wrap">
+                    <div class="container mt-5">
+                        <div class="alert alert-danger text-center">
+                            <h4 class="mb-3">❌ Payment Failed</h4>
+                            <p>Your payment via <strong>Payzah</strong> has been Failed. Please try again.
+                            </p>
+                        </div>
+
+                        <t t-if="tx">
+                            <div class="card mt-4">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-6">
+                                            <strong>Amount</strong>
+                                            <div>
+                                                <t t-esc="tx.amount"/>
+                                                <t t-esc="tx.currency_id.name"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Reference</strong>
+                                            <div>
+                                                <t t-esc="tx.reference"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <div class="text-center mt-4">
+                            <a href="/" class="btn btn-primary">Go to My Account</a>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <!-- ============================= -->
+        <!-- Payzah Already Paid PAGE -->
+        <!-- ============================= -->
+        <template id="payzah_payment_gateway_already_paid_form"
+                  name="Payzah Payment Already Paid">
+            <t t-call="website.layout">
+                <div id="wrap">
+                    <div class="container mt-5">
+                        <div class="alert alert-success text-center">
+                            <h4 class="mb-3">✅ Payment Already Received</h4>
+                            <p>This invoice has already been paid. Thank you for your payment!</p>
+                        </div>
+
+                        <div class="card mt-4">
+                            <div class="card-body">
+                                <div class="row text-center">
+                                    <div class="col-md-4">
+                                        <strong>Reference</strong>
+                                        <div>
+                                            <t t-esc="tx.reference"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Amount</strong>
+                                        <div>
+                                            <t t-esc="tx.amount"/>
+                                            <t t-esc="tx.currency_id.name"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <strong>Date</strong>
+                                        <div>
+                                            <t t-esc="tx.last_state_change"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="/" class="btn btn-primary">Go to My Account</a>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

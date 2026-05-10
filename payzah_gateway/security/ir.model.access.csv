@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_payzah_payment_gateway_payzah_payment_gateway,payzah_payment_gateway.payzah_payment_gateway,model_payzah_payment_gateway_payzah_payment_gateway,base.group_user,1,1,1,1

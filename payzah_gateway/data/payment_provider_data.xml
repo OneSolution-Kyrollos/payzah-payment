@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_method_payzah_knet" model="payment.method">
+        <field name="name">Knet</field>
+        <field name="code">payzah_knet</field>
+        <field name="sequence">10</field>
+        <field name="support_tokenization" eval="False"/>
+        <field name="active" eval="True"/>
+        <field name="image_payment_form" type="base64"
+               file="payzah_gateway/static/description/assets/icons/knet.png"/>
+    </record>
+
+    <record id="payment_method_payzah_credit" model="payment.method">
+        <field name="name">Credit Card</field>
+        <field name="code">payzah_credit</field>
+        <field name="sequence">20</field>
+        <field name="support_tokenization" eval="False"/>
+        <field name="active" eval="True"/>
+        <field name="image_payment_form" type="base64"
+               file="payzah_gateway/static/description/assets/icons/visa_mastercard.png"/>
+    </record>
+
+    <record id="payment_provider_upi_payzah" model="payment.provider">
+        <field name="name">Payzah</field>
+        <field name="code">payzah</field>
+        <field name="state">test</field>
+        <field name="is_published" eval="True"/>
+        <field name="image_128" type="base64"
+               file="payzah_gateway/static/description/images.png"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
+        <field name="payment_method_ids" eval="[
+            (4, ref('payment_method_payzah_knet')),
+            (4, ref('payment_method_payzah_credit'))
+        ]"/>
+    </record>
+</odoo>

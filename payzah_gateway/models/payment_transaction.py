@@ -136,57 +136,57 @@ class PaymentTransaction(models.Model):
 
         return {'api_url': redirect_url}
 
-    def _get_tx_from_notification_data(self, provider_code, notification_data):
-        """
-        Extracts and validates the transaction associated with the provided provider code
-        and notification data. The method retrieves payment details using Payzah's API
-        and ensures that a matching transaction exists.
-
-        The function primarily serves as an integration point with the Payzah payment
-        provider system. It verifies transaction details by sending a POST request to
-        Payzah's API. The retrieved details are then checked against existing
-        transactions in the system.
-
-        :param provider_code: The short code identifying the payment provider.
-        :type provider_code: Str
-        :param notification_data: Data received as a notification from the payment
-            provider, typically containing payment identifiers.
-        :type notification_data: Dict
-        :return: The transaction retrieved based on the notification data, if valid.
-        :rtype: Recordset
-        :raises ValidationError: If no matching transaction is found for the provided
-            data.
-        """
-        api_key = self.env['payment.provider'].search([('code', '=', 'payzah')]).payzah_token
-        base_api_url = self.env['payment.provider'].search([('code', '=', 'payzah')])._payzah_get_api_url()
-
-        url = f"{base_api_url}ws/paymentgateway/get-payment-details"
-        paymentid = notification_data.get('paymentId')
-        trackId = notification_data.get('trackId')
-        payload = json.dumps({
-            "trackid": trackId,
-            "payment_id": paymentid
-        })
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': api_key,
-        }
-
-        response = requests.request("POST", url, headers=headers, data=payload)
-        response_data = response.json()
-        tx = super()._get_tx_from_notification_data(provider_code,
-                                                    notification_data)
-        if provider_code != 'payzah' or len(tx) == 1:
-            return tx
-        tx = self.search([('id', '=', trackId), ('provider_code', '=', 'payzah')])
-        if not tx:
-            raise ValidationError(
-                "payzah: " + _(
-                    "No transaction found matching reference %s.",
-                    trackId)
-            )
-        return tx
+    # def _get_tx_from_notification_data(self, provider_code, notification_data):
+    #     """
+    #     Extracts and validates the transaction associated with the provided provider code
+    #     and notification data. The method retrieves payment details using Payzah's API
+    #     and ensures that a matching transaction exists.
+    #
+    #     The function primarily serves as an integration point with the Payzah payment
+    #     provider system. It verifies transaction details by sending a POST request to
+    #     Payzah's API. The retrieved details are then checked against existing
+    #     transactions in the system.
+    #
+    #     :param provider_code: The short code identifying the payment provider.
+    #     :type provider_code: Str
+    #     :param notification_data: Data received as a notification from the payment
+    #         provider, typically containing payment identifiers.
+    #     :type notification_data: Dict
+    #     :return: The transaction retrieved based on the notification data, if valid.
+    #     :rtype: Recordset
+    #     :raises ValidationError: If no matching transaction is found for the provided
+    #         data.
+    #     """
+    #     api_key = self.env['payment.provider'].search([('code', '=', 'payzah')]).payzah_token
+    #     base_api_url = self.env['payment.provider'].search([('code', '=', 'payzah')])._payzah_get_api_url()
+    #
+    #     url = f"{base_api_url}ws/paymentgateway/get-payment-details"
+    #     paymentid = notification_data.get('paymentId')
+    #     trackId = notification_data.get('trackId')
+    #     payload = json.dumps({
+    #         "trackid": trackId,
+    #         "payment_id": paymentid
+    #     })
+    #     headers = {
+    #         'Content-Type': 'application/json',
+    #         'Accept': 'application/json',
+    #         'Authorization': api_key,
+    #     }
+    #
+    #     response = requests.request("POST", url, headers=headers, data=payload)
+    #     response_data = response.json()
+    #     tx = super()._get_tx_from_notification_data(provider_code,
+    #                                                 notification_data)
+    #     if provider_code != 'payzah' or len(tx) == 1:
+    #         return tx
+    #     tx = self.search([('id', '=', trackId), ('provider_code', '=', 'payzah')])
+    #     if not tx:
+    #         raise ValidationError(
+    #             "payzah: " + _(
+    #                 "No transaction found matching reference %s.",
+    #                 trackId)
+    #         )
+    #     return tx
 
     def _handle_notification_data(self, provider_code, notification_data):
         """
@@ -201,12 +201,21 @@ class PaymentTransaction(models.Model):
         :return: A transaction object associated with the processed notification data.
         :rtype: Any
         """
-        tx = self._get_tx_from_notification_data(provider_code,
-                                                 notification_data)
+        if provider_code != 'payzah':
+            return super()._handle_notification_data(provider_code, notification_data)
+
+        track_id = notification_data.get('trackId')
+        tx = self.search([
+            ('id', '=', track_id),
+            ('provider_code', '=', 'payzah')
+        ], limit=1)
+
+        if not tx:
+            raise ValidationError(
+                _("Payzah: No transaction found for trackId %s") % track_id
+            )
+
         tx._process_notification_data(notification_data)
-        
-        # _execute_callback removed in Odoo 18 — core handles it automatically
-        # tx._execute_callback()
         return tx
 
     def _process_notification_data(self, notification_data):
@@ -220,7 +229,6 @@ class PaymentTransaction(models.Model):
         :type notification_data: Dict
         :return: None
         """
-        super()._process_notification_data(notification_data)
         if self.provider_code != 'payzah':
             return
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Payzah Payment Gateway',
-    'summary': "Payzah Payment Gateway for Odoo 18",
+    'summary': "Payzah Payment Gateway for Odoo 19",
     'description': """
-Payzah Payment Gateway Integration for Odoo 18
+Payzah Payment Gateway Integration for Odoo 19
 Supports Knet and Credit Card payments.
 Developed by One Solutions - Kuwait
 Contact: +96592229650
@@ -14,7 +14,7 @@ Contact: +96592229650
     'website': "https://payzah.com",
     'license': 'LGPL-3',
     'category': 'Accounting/Payment Acquirers',
-    'version': '18.0.1.0.0',
+    'version': '19.0.1.0.0',
     'depends': [
         'payment',
         'account',

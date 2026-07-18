@@ -104,7 +104,7 @@ class PaymentPayzahController(http.Controller):
                 request.session['sale_last_order_id'] = [sale_order.id]
 
         if payment_status == 'CAPTURED':
-            tx._handle_notification_data('payzah', data)
+            request.env['payment.transaction'].sudo()._handle_notification_data('payzah', data)
             return request.redirect('/payment/payzah/success')
         elif payment_status == 'CANCELED':
             tx._set_canceled()

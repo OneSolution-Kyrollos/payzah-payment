@@ -30,8 +30,27 @@ _logger = logging.getLogger(__name__)
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
-    paymentid = fields.Char('PaymentID')
-    trackid = fields.Char()
+
+    PaymentUrl = fields.Char('Payment URL')
+    PaymentID = fields.Char('PaymentID')
+    transit_url = fields.Char('Transit URL')
+    direct_url = fields.Char('Direct URL')
+
+    trackid = fields.Char('Track ID')
+
+    paymentid_details = fields.Char('PaymentID Details')
+    payzah_reference_code = fields.Char('Payzah Reference Code')
+    payzah_knet_payment_id = fields.Char('Knet Payment ID')
+    payzah_transaction_number = fields.Char('Transaction Number')
+    payzah_tracking_number = fields.Char('Tracking Number')
+    payzah_payment_date = fields.Char('Payzah Payment Date')
+    payzah_payment_method = fields.Char('Payzah Payment Method')
+    payzah_payment_status = fields.Char('Payzah Payment Status')
+    payzah_udf1 = fields.Char('UDF1')
+    payzah_udf2 = fields.Char('UDF2')
+    payzah_udf3 = fields.Char('UDF3')
+    payzah_udf4 = fields.Char('UDF4')
+    payzah_udf5 = fields.Char('UDF5')
 
     def _get_specific_rendering_values(self, processing_values):
         """
@@ -127,7 +146,10 @@ class PaymentTransaction(models.Model):
             )
 
         self.write({
-            'paymentid': data['PaymentID'],
+            'PaymentUrl': data['PaymentUrl'],
+            'PaymentID': data['PaymentID'],
+            'transit_url': data['transit_url'],
+            'direct_url': data['direct_url'],
             'trackid': str(self.id),
         })
 
@@ -226,6 +248,24 @@ class PaymentTransaction(models.Model):
 
         payment_status = notification_data.get('paymentStatus')
 
+        # Save all Payzah response fields
+        self.write({
+            'payzah_reference_code': notification_data.get('payzahRefrenceCode'),
+            'payzah_knet_payment_id': notification_data.get('knetPaymentId'),
+            'paymentid_details': notification_data.get('paymentId'),
+            'payzah_transaction_number': notification_data.get('transactionNumber'),
+            'payzah_tracking_number': notification_data.get('trackingNumber'),
+            'payzah_payment_date': notification_data.get('paymentDate'),
+            'payzah_payment_method': notification_data.get('paymentMethod'),
+            'payzah_payment_status': payment_status,
+            'payzah_udf1': notification_data.get('UDF1'),
+            'payzah_udf2': notification_data.get('UDF2'),
+            'payzah_udf3': notification_data.get('UDF3'),
+            'payzah_udf4': notification_data.get('UDF4'),
+            'payzah_udf5': notification_data.get('UDF5'),
+            'trackid': notification_data.get('trackId'),
+        })
+
         if payment_status == 'CAPTURED':
             self._set_done()
             self._finalize_success_processing()
@@ -311,3 +351,44 @@ class PaymentTransaction(models.Model):
         elif self.invoice_ids:
             for invoice in self.invoice_ids.filtered(lambda i: i.state != 'cancel'):
                 _register_payment(invoice)
+
+    def _send_refund_request(self, amount_to_refund=None, reason=None):
+        self.ensure_one()
+        if self.provider_code != 'payzah':
+            return super()._send_refund_request(amount_to_refund=amount_to_refund)
+
+        provider = self.provider_id
+        api_url = f"{provider._payzah_get_api_url()}ws/paymentgateway/refund"
+
+        refund_amount = amount_to_refund or self.amount
+        refund_type = '1' if refund_amount >= self.amount else '2'
+
+        payload = {
+            "trackid": str(self.id),
+            "refrence_code": self.payzah_reference_code,
+            "amount": str(refund_amount),
+            "refund_type": refund_type,
+            "message": reason or _("Refund via Odoo Credit Note"),
+        }
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': provider.payzah_token,
+        }
+
+        try:
+            response = requests.post(api_url, headers=headers, json=payload, timeout=30)
+            response.raise_for_status()
+            response_data = response.json()
+        except requests.exceptions.RequestException as e:
+            raise ValidationError(_("Payzah Refund: Connection error — %s") % str(e))
+
+        _logger.info("Payzah refund response: %s", response_data)
+
+        if not response_data.get('status'):
+            raise ValidationError(
+                _("Payzah Refund: Failed — %s") % response_data.get('message')
+            )
+
+        return response_data

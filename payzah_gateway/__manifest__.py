@@ -23,6 +23,7 @@ Contact: +96592229650
     ],
     'data': [
         'views/payment_provider_view.xml',
+        'views/payment_transaction_view.xml',
         'views/payment_payzah_templates.xml',
         'views/payzah_payment_template.xml',
         'data/payment_provider_data.xml',

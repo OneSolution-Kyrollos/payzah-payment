@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_payment_transaction_payzah_form" model="ir.ui.view">
+        <field name="name">payment.transaction.payzah.form</field>
+        <field name="model">payment.transaction</field>
+        <field name="inherit_id" ref="payment.payment_transaction_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group[last()]" position="after">
+                <group>
+                    <group string="Payzah Response" invisible="provider_code != 'payzah'">
+                        <field name="PaymentUrl" string="Payment URL"/>
+                        <field name="PaymentID" string="Payment ID"/>
+                        <field name="transit_url" string="Transit URL"/>
+                        <field name="direct_url" string="Direct URL"/>
+                        <field name="trackid" string="Track ID"/>
+                    </group>
+                    <group string="Payzah Details" invisible="provider_code != 'payzah'">
+                        <field name="payzah_reference_code" string="Payzah Reference Code"/>
+                        <field name="paymentid_details" string="Payment ID Details"/>
+                        <field name="payzah_knet_payment_id" string="Knet Payment ID"/>
+                        <field name="payzah_transaction_number" string="Transaction Number"/>
+                        <field name="payzah_tracking_number" string="Tracking Number"/>
+                        <field name="payzah_payment_date" string="Payment Date"/>
+                        <field name="payzah_payment_status" string="Payment Status"/>
+                        <field name="payzah_udf1" string="UDF1" invisible="not payzah_udf1"/>
+                        <field name="payzah_udf2" string="UDF2" invisible="not payzah_udf2"/>
+                        <field name="payzah_udf3" string="UDF3" invisible="not payzah_udf3"/>
+                        <field name="payzah_udf4" string="UDF4" invisible="not payzah_udf4"/>
+                        <field name="payzah_udf5" string="UDF5" invisible="not payzah_udf5"/>
+                    </group>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
